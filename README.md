@@ -17,7 +17,17 @@ ai201-project2-fitfindr-starter/
 
 ## Setup
 
+**macOS / Linux:**
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+**Windows:**
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
@@ -51,6 +61,65 @@ Load an example wardrobe with:
 from utils.data_loader import get_example_wardrobe
 wardrobe = get_example_wardrobe()
 ```
+
+## Tool Inventory
+
+Your README submission must document each tool's name, inputs, and return value. **These must exactly match your actual function signatures in `tools.py`.** Your documented interfaces will be checked against your actual function signatures in `tools.py` — if the parameter count or types contradict what's in the code, you may not receive full credit for that tool.
+
+---
+
+## Interaction Walkthrough
+
+<!-- Walk through a complete interaction step by step: natural language query → each tool call (and why) → final fit card.
+     Walk through this carefully — it's how graders follow your agent's reasoning without a live demo.
+     Use a specific example — do not leave this as a template. -->
+
+**User query:**
+
+**Step 1 — Tool called:**
+- Tool:
+- Input:
+- Why this tool:
+- Output:
+
+**Step 2 — Tool called:**
+- Tool:
+- Input:
+- Why this tool:
+- Output:
+
+**Step 3 — Tool called:**
+- Tool:
+- Input:
+- Why this tool:
+- Output:
+
+**Final output to user:**
+
+---
+
+## Error Handling and Fail Points
+
+<!-- For each tool, describe the specific failure mode and what your agent does in response.
+     This maps to the error handling section of the rubric (F5-C1). -->
+
+| Tool | Failure mode | Agent response |
+|------|-------------|----------------|
+| `search_listings` | | |
+| `suggest_outfit` | | |
+| `create_fit_card` | | |
+
+---
+
+## Spec Reflection
+
+<!-- Answer both questions with at least 2–3 sentences each. -->
+
+**One way planning.md helped during implementation:**
+
+**One divergence from your spec, and why:**
+
+---
 
 ## Where to Start
 

@@ -56,7 +56,8 @@ You must have at least 3 tools. The three required tools are listed — add any 
 
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `outfit` (...): ...
+- `outfit` (str): ...
+- `new_item` (dict): ...
 
 **What it returns:**
 <!-- Describe the return value -->
@@ -105,8 +106,10 @@ For each tool, describe the specific failure mode you're handling and what the a
                                                                           ↕
                                                                    State / Session
      Show what triggers each tool, how state flows between them, and where error paths branch off.
-     ASCII art, a Mermaid diagram (https://mermaid.js.org/syntax/flowchart.html), or an embedded
-     sketch are all fine. You'll share this diagram with an AI tool when asking it to implement
+     Use ASCII art or a Mermaid diagram (https://mermaid.js.org/syntax/flowchart.html).
+     Do NOT embed an image — graders need to read your diagram directly in the file;
+     an embedded image or screenshot cannot be evaluated.
+     You'll share this diagram with an AI tool when asking it to implement
      the planning loop and each individual tool. -->
 
 ---
