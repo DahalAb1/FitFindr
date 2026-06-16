@@ -126,8 +126,33 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
 
     Before writing code, fill in the Tool 2 section of planning.md.
     """
-    # Replace this with your implementation
-    return ""
+    client = _get_groq_client()
+    item_desc = f"{new_item['title']} ({new_item['category']}, colors: {', '.join(new_item['colors'])})"
+
+    items = wardrobe.get("items", [])
+    if not items:
+        # No wardrobe to reference — ask for general styling advice.
+        prompt = (
+            f"A user just thrifted: {item_desc}.\n"
+            "They have no wardrobe saved yet. In 2-3 sentences, suggest what "
+            "kinds of pieces pair well with it and what vibe it suits."
+        )
+    else:
+        wardrobe_list = "\n".join(
+            f"- {i['name']} ({i['category']})" for i in items
+        )
+        prompt = (
+            f"A user just thrifted: {item_desc}.\n"
+            f"Their wardrobe:\n{wardrobe_list}\n\n"
+            "Suggest 1-2 complete outfits pairing the new item with specific "
+            "pieces named above. Add one short styling tip. Keep it casual."
+        )
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
 
 
 # ── Tool 3: create_fit_card ───────────────────────────────────────────────────
