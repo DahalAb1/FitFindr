@@ -69,8 +69,34 @@ def search_listings(
 
     Before writing code, fill in the Tool 1 section of planning.md.
     """
-    # Replace this with your implementation
-    return []
+    listings = load_listings()
+    keywords = description.lower().split()
+
+    scored = []
+    for item in listings:
+        # Hard filters: price and size. Skip a filter when its arg is None.
+        if max_price is not None and item["price"] > max_price:
+            continue
+        if size is not None and size.lower() not in item["size"].lower():
+            continue
+
+        # Relevance score: how many description words appear in the item's
+        # searchable text (title + description + style_tags).
+        haystack = (
+            item["title"]
+            + " "
+            + item["description"]
+            + " "
+            + " ".join(item["style_tags"])
+        ).lower()
+        score = sum(1 for word in keywords if word in haystack)
+
+        if score > 0:
+            scored.append((score, item))
+
+    # Sort by score, highest first, and return just the listing dicts.
+    scored.sort(key=lambda pair: pair[0], reverse=True)
+    return [item for _, item in scored]
 
 
 # ── Tool 2: suggest_outfit ────────────────────────────────────────────────────
