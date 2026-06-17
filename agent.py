@@ -18,7 +18,43 @@ Usage (once implemented):
     print(result["error"])   # None on success
 """
 
+import re
+
 from tools import search_listings, suggest_outfit, create_fit_card
+
+
+# ── query parsing ─────────────────────────────────────────────────────────────
+
+def _parse_query(query: str) -> dict:
+    """
+    Pull description, size, and max_price out of a natural-language query
+    using regex. Deterministic and offline — no LLM call needed.
+
+    "vintage graphic tee under $30, size M"
+        → {"description": "vintage graphic tee", "size": "M", "max_price": 30.0}
+    """
+    size = None
+    max_price = None
+    description = query
+
+    price_match = re.search(r"(?:under|below|\$)\s*\$?\s*(\d+(?:\.\d+)?)", query, re.I)
+    if price_match:
+        max_price = float(price_match.group(1))
+        description = description.replace(price_match.group(0), " ")
+
+    size_match = re.search(r"\bsize\s+([A-Za-z0-9/]+)", query, re.I)
+    if size_match:
+        size = size_match.group(1)
+        description = description.replace(size_match.group(0), " ")
+
+    # Strip filler words and punctuation so they don't pollute keyword scoring.
+    description = re.sub(r"\b(looking for|i'?m|a|an|the|under)\b", " ", description, flags=re.I)
+    description = re.sub(r"[^\w\s]", " ", description)
+    description = re.sub(r"\s+", " ", description).strip()
+    if not description:
+        description = query  # fallback if parsing stripped everything
+
+    return {"description": description, "size": size, "max_price": max_price}
 
 
 # ── session state ─────────────────────────────────────────────────────────────
@@ -92,9 +128,40 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     Before writing code, complete the Planning Loop and State Management sections
     of planning.md — your implementation should match what you described there.
     """
-    # TODO: implement the planning loop
     session = _new_session(query, wardrobe)
-    session["error"] = "Planning loop not yet implemented."
+
+    # Step 2: parse the query into search parameters.
+    session["parsed"] = _parse_query(query)
+    parsed = session["parsed"]
+
+    # Step 3: search. Branch on empty results — this is the one decision point.
+    results = search_listings(
+        parsed["description"], parsed["size"], parsed["max_price"]
+    )
+    session["search_results"] = results
+    if not results:
+        size_part = f" in size {parsed['size']}" if parsed["size"] else ""
+        price_part = f" under ${parsed['max_price']:.0f}" if parsed["max_price"] else ""
+        session["error"] = (
+            f"No listings found for '{parsed['description']}'{size_part}{price_part} — "
+            "try raising your budget or removing the size filter."
+        )
+        return session  # do NOT call suggest_outfit / create_fit_card
+
+    # Step 4: select the top result.
+    session["selected_item"] = results[0]
+
+    # Step 5: suggest an outfit from the selected item + wardrobe.
+    session["outfit_suggestion"] = suggest_outfit(
+        session["selected_item"], wardrobe
+    )
+
+    # Step 6: turn the outfit into a shareable fit card.
+    session["fit_card"] = create_fit_card(
+        session["outfit_suggestion"], session["selected_item"]
+    )
+
+    # Step 7: return the completed session.
     return session
 
 
